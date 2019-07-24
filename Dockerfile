@@ -38,10 +38,9 @@ RUN yum -y update \
  && yum clean all 
 
 COPY --from=build0 ${NETAPP_HARVEST_HOME}/ ${NETAPP_HARVEST_HOME}/
-COPY assets/yq_linux_amd64 ${NETAPP_HARVEST_HOME}/yq
-COPY netapp-harvest.conf.tmpl ${NETAPP_HARVEST_HOME}/netapp-harvest.conf
+COPY assets/yq_linux_amd64 /usr/bin/yq
 COPY entrypoint-simple.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh ${NETAPP_HARVEST_HOME}/yq
+RUN chmod +x /entrypoint.sh /usr/bin/yq
 
 EXPOSE 2003 2004
 

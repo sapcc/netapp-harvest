@@ -52,7 +52,7 @@ fi
 cp $NETAPP_HARVEST_CONF_TMPL $NETAPP_HARVEST_CONF
 checksum=
 
-# check status every 10 seconds
+# check status every 60 seconds
 # check netapp-filers.yaml
 while true; do
     newchecksum=$(cat $NETAPP_FILERS_YAML | md5sum | cut -d ' ' -f 1)
@@ -79,8 +79,8 @@ while true; do
     # if ls ${NETAPP_HOME}/log/*.log 1> /dev/null 2>&1; then
     #     tail -f ${NETAPP_HOME}/log/*.log
     # fi
-    ${NETAPP_HOME}/netapp-manager -status \
-        -confdir ${NETAPP_HOME}
-    echo "sleep 60 seconds"
+    # ${NETAPP_HOME}/netapp-manager -status \
+    #     -confdir ${NETAPP_HOME}
+    # echo "sleep 60 seconds"
     sleep 60
 done

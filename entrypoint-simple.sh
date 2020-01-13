@@ -25,6 +25,14 @@ function read_host() {
 function set_filer_group() {
     if [[ $1 =~ bb[0-9]+$ ]]; then
         FILER_GROUP="vpod"
+    elif [[ $1 =~ cp[0-9]+$ ]]; then
+        FILER_GROUP="control-plane"
+    elif [[ $1 =~ md[0-9]+$ ]]; then
+        FILER_GROUP="manila"
+    elif [[ $1 =~ bm[0-9]+$ ]]; then
+        FILER_GROUP="bare-metal"
+    else
+        FILER_GROUP="unknown"
     fi
 }
 function write_config() {

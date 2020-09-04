@@ -18,6 +18,7 @@ RUN unzip -j netapp-manageability-sdk-${NM_SDK_VERSION}.zip netapp-manageability
 #---
 
 FROM centos:latest
+LABEL source_repository="https://github.com/sapcc/netapp-harvest"
 ENV NETAPP_HARVEST_HOME=/opt/netapp-harvest
 
 WORKDIR ${NETAPP_HARVEST_HOME}

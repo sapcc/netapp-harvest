@@ -1,5 +1,4 @@
 FROM centos:centos7.6.1810 as build0
-
 ENV NETAPP_HARVEST_HOME=/opt/netapp-harvest
 ENV NETAPP_HARVEST_VERSION=1.6-1
 ENV NM_SDK_VERSION=9.4
@@ -22,6 +21,7 @@ RUN unzip -j netapp-manageability-sdk-${NM_SDK_VERSION}.zip netapp-manageability
 #---
 
 FROM centos:centos7.6.1810
+LABEL source_repository="https://github.com/sapcc/netapp-harvest"
 ENV NETAPP_HARVEST_HOME=/opt/netapp-harvest
 ENV LC_ALL=C
 

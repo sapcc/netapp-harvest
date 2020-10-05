@@ -1,6 +1,6 @@
 GOFILES := $(wildcard *.go)
 
-IMAGE=hub.global.cloud.sap/monsoon/netapp-harvester
+IMAGE=keppel.eu-de-1.cloud.sap/ccloud/netapp-harvester
 BRANCH=$(shell  git branch | sed -n '/\* /s///p')
 HASH := $(shell git rev-parse HEAD | head -c 7)
 

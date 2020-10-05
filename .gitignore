@@ -1,3 +1,8 @@
 *zip
 *deb
 *rpm
+
+test.sh
+netbox_filers.yaml
+
+.idea/

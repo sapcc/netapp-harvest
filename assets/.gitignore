@@ -1,3 +1,4 @@
 *
 */
 !.gitignore
+!yq_linux_amd64

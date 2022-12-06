@@ -103,7 +103,9 @@ while true; do
     else
         # check netapp manager status: restart when no worker is running
         running_workers=$(${NETAPP_HOME}/netapp-manager -status -confdir ${NETAPP_HOME} | grep '^\[RUNNING\]' | wc -l)
-        restart=$running_workers
+        if [ "$running_workers" -eq "0" ]; then
+            restart=1
+        fi
     fi
 
     if [ "$restart" -gt "0" ]; then

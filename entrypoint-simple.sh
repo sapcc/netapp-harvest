@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -u
 
 NETAPP_HOME=${NETAPP_HOME:-/opt/netapp-harvest}
 NETAPP_FILERS_YAML=${NETAPP_HOME}/config/netapp-filers.yaml
@@ -7,6 +8,7 @@ NETAPP_HARVEST_CONF_TMPL=${NETAPP_HOME}/config/netapp-harvest.conf
 NETAPP_HARVEST_CONF=${NETAPP_HOME}/netapp-harvest.conf
 NETAPP_USERNAME=${NETAPP_USERNAME:-admin}
 NETAPP_PASSWORD=${NETAPP_PASSWORD:-netapp123}
+REPLICA=${HOSTNAME##*-}
 
 #===============================================================================
 
@@ -53,17 +55,19 @@ function write_config() {
 }
 
 function check_filer_with_backoff {
-    # check filer file with backoff timeout 1, 2, 4, 8, ..., 256, 300, 300, ...
+    # find filer file with exponetial backoff timeout 1, 2, 4, 8, ..., 256, 300, 300, ...
+    # returns checksum of the found file
     local timeout_max=300
     local timeout=${TIMEOUT-1}
     local attempt=0
 
     while true;
     do
-        if [ ! -f "$NETAPP_FILERS_YAML" ]; then 
-            echo "File $NETAPP_FILERS_YAML not found. Retrying in $timeout.."
-        else
+        if [ -f "$NETAPP_FILERS_YAML" ]; then 
+            echo $(cat $NETAPP_FILERS_YAML | md5sum | cut -d ' ' -f 1)
             break
+        else
+            >&2 echo "File $NETAPP_FILERS_YAML not found. Retrying in $timeout.."
         fi
 
         sleep $timeout
@@ -75,29 +79,31 @@ function check_filer_with_backoff {
     done
 }
 
+#===============================================================================
+
 # check netapp-filers.yaml every 300 seconds
 checksum=
 
 while true; do
-    check_filer_with_backoff
-
     restart=0
-    newchecksum=$(cat $NETAPP_FILERS_YAML | md5sum | cut -d ' ' -f 1)
+    newchecksum=$(check_filer_with_backoff)
 
     if [ "$checksum" != "$newchecksum" ]; then
         # restart if checksum is different
         restart=1
         checksum=$newchecksum
 
-        echo "(new) file $NETAPP_FILERS_YAML found"
-        cat $NETAPP_FILERS_YAML
-
         # read $NETAPP_FILERS_YAML and re-generate $NETAPP_HARVEST_CONF
-        i=0
+        echo "generating harvest config from filers in $NETAPP_FILERS_YAML on replica $REPLICA"
         cp $NETAPP_HARVEST_CONF_TMPL $NETAPP_HARVEST_CONF
+
+        i=0
         while [ $(read_name $i) != "null" ]; do
-            write_config $i >> $NETAPP_HARVEST_CONF
-            echo >> $NETAPP_HARVEST_CONF
+            if (( i % REPLICAS == REPLICA )); then
+                echo "add filer $(read_name $i)"
+                write_config $i >> $NETAPP_HARVEST_CONF
+                echo >> $NETAPP_HARVEST_CONF
+            fi
             i=$(( i + 1 ))
         done
     else
@@ -119,3 +125,5 @@ while true; do
     # echo "sleep 300 seconds"
     sleep 300
 done
+
+# vim: sw=4
